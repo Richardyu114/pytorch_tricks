@@ -30,6 +30,8 @@
 10. **模型相关操作**
 11. **Pytorch内置one hot函数**  
 12. **网络参数初始化**  
+13. **就地操作inplace operation可能出现问题**
+14. **torchsnooper查看Tensor维度**
 
 
 
@@ -462,3 +464,17 @@ for layer in net1.modules():
         # 定义为均值为 0，方差为 0.5 的正态分布
 ``` 
 
+### 13、就地操作inplace operation可能出现问题
+
+在使用pytorch时，要注意对`requires_grad=True`的Tensor和求梯度阶段需要用到的Tensor都不能用inplace operation，也就是不能直接对这些张量进行数值操作，否则会报错，这是官方为了防止backward出错设置的，最好加上.detach()曲线救国，见[此](https://zhuanlan.zhihu.com/p/38475183)
+
+### 14、torchsnooper查看Tensor维度
+
+利用[Torchsnooper](https://github.com/zasdfgbnm/TorchSnooper)查看Tensor流进行Debug
+
+```
+pip install torchsnooper
+```
+安装完了以后，只需要用 @torchsnooper.snoop() 装饰一下要调试的函数，这个函数在执行的时候，就会自动 print 出来每一行的执行结果的 tensor 的形状、数据类型、设备、是否需要梯度的信息
+
+机器之心[推荐](https://www.jiqizhixin.com/articles/2019-06-17-12)
