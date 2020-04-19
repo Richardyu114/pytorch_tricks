@@ -32,6 +32,7 @@
 12. **网络参数初始化**  
 13. **就地操作inplace operation可能出现问题**
 14. **torchsnooper查看Tensor维度**
+15. **BCE_LOSS防logits过大exp(x)溢出**
 
 
 
@@ -478,3 +479,21 @@ pip install torchsnooper
 安装完了以后，只需要用 @torchsnooper.snoop() 装饰一下要调试的函数，这个函数在执行的时候，就会自动 print 出来每一行的执行结果的 tensor 的形状、数据类型、设备、是否需要梯度的信息
 
 机器之心[推荐](https://www.jiqizhixin.com/articles/2019-06-17-12)
+
+
+### 15、BCE_LOSS防logits过大exp(x)溢出
+
+在做CS231N作业时指出的一个问题，现在PyTorch官方应该已经解决了这个问题，即`nn.BCEWithLogitsLoss()`
+
+```
+class StableBCELoss(nn.modules.Module):
+       def __init__(self):
+             super(StableBCELoss, self).__init__()
+       def forward(self, input, target):
+             neg_abs = - input.abs()
+             loss = input.clamp(min=0) - input * target + (1 + neg_abs.exp()).log()
+             return loss.mean()
+ ```
+ 推导公式与算法设计原理在[此](https://www.tensorflow.org/api_docs/python/tf/nn/sigmoid_cross_entropy_with_logits)
+ 
+ 原始相关的PyTorch issue在[此](https://github.com/pytorch/pytorch/issues/751)
